@@ -3952,6 +3952,22 @@ test("LLM Gateway keeps its display name on linked files", () => {
   expect(same).not.toHaveProperty("name");
 });
 
+test("LLM Gateway linked files drop a description equal to the lab's", () => {
+  // The sync passes the resolved existing model, so an inherited description
+  // must not be written back as an override; a real delta stays.
+  const inherited = buildLLMGatewayModel(llmGatewayModel(), {
+    base_model: "anthropic/claude-fable-5",
+    description: "Claude model for creative writing, analysis, and controlled agent workflows",
+  });
+  expect(inherited).not.toHaveProperty("description");
+
+  const delta = buildLLMGatewayModel(llmGatewayModel(), {
+    base_model: "anthropic/claude-fable-5",
+    description: "Host-specific description",
+  });
+  expect(delta).toMatchObject({ description: "Host-specific description" });
+});
+
 test("reads curation from v2 aggregated siblings", () => {
   // providers/llmgateway/models/Qwen3.8-27B.toml is a v2 file whose effort
   // list lives under [capabilities]; mapped deployments still inherit it.
