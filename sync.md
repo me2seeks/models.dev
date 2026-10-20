@@ -399,8 +399,10 @@ Requesty is implemented in `packages/core/src/sync/providers/requesty.ts`.
 
 - Run it with `bun models:sync requesty` or `bun requesty:sync`.
 - Source endpoint: `https://router.requesty.ai/v1/models/managed`; no auth required (the managed catalog is public).
-- The endpoint is the sole source of truth. `preserveBaseModels` and `preserveDescriptions` are both `false` so an upstream correction always wins over a previously committed value; local TOMLs are never read back into the translation.
-- Managed IDs are bare (`claude-opus-4-7`) or region-pinned (`gpt-5.4@eu`) rather than OpenRouter-shaped, so they resolve through `resolveModelMetadataBaseModel` after the `@<region>` qualifier is stripped. Every model emits `base_model` plus provider-specific overrides only.
+- The endpoint is the source of truth for prices, limits and capability flags. `preserveBaseModels` and `preserveDescriptions` are both `false`, so an upstream correction wins over a previously committed value. The translation reads two things back from the existing file:
+  - `base_model`, but only when `resolveRequestyBaseModel` has no match for the ID. This keeps a route linked to its lab by hand (e.g. `seed-1.8` → `bytedance-seed/seed-1-8`). On such a hand-linked file, a catalog `max_output_tokens` of 0 (unknown) leaves `limit.output` inherited from the lab instead of stamping the context window.
+  - A curated `status`. The catalog's `retires` date is not synced, so `status = "deprecated"` is set by hand once a route retires.
+- Managed IDs are bare (`claude-opus-4-7`) or region-pinned (`gpt-5.4@eu`) rather than OpenRouter-shaped, so they resolve through `resolveModelMetadataBaseModel` after the `@<region>` qualifier is stripped. Resolved and hand-linked models emit `base_model` plus provider-specific overrides only; unmatched IDs are written as standalone files.
 - Anthropic files `.0` releases with an explicit `-0` (`claude-sonnet-4-0.toml`) while later point releases drop it, so bare `claude-<tier>-<major>` IDs retry against the `-0` filename.
 - Region variants are written as separate models: `gpt-5.4` and `gpt-5.4@eu` are distinct files that share a `base_model` and differ only in served pricing and limits.
 - Prices are per-token USD and are converted to per-1M-token numbers. `pricing[]` bands become `cost.tiers`, with the first band as the flat `cost`. Price fields are nullable upstream, so a route quoting no prices gets no `[cost]` section rather than a fabricated zero.

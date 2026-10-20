@@ -185,3 +185,21 @@ test("keeps a hand-linked base_model and curated status", () => {
     cost: { input: 0.1, output: 0.5 },
   });
 });
+
+test("hand-linked routes without a catalog output limit inherit the lab's", () => {
+  const model = buildRequestyModel(RequestyModel.parse({
+    id: "seed-1.8",
+    created: Date.parse("2026-05-27") / 1_000,
+    description: "Requesty description",
+    context_window: 256_000,
+    max_output_tokens: 0,
+    supports_vision: true,
+    supports_reasoning: true,
+    supports_tool_calling: true,
+    input_price: 0.00000025,
+    output_price: 0.000002,
+  }), { base_model: "bytedance-seed/seed-1-8" });
+
+  expect(resolveRequestyBaseModel("seed-1.8")).toBeUndefined();
+  expect(model).not.toHaveProperty("limit");
+});

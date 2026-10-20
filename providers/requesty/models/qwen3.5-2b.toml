@@ -1,3 +1,4 @@
+# Modalities: image formats from models/alibaba/qwen3.5-27b.toml (same Qwen3.5 family; no qwen3.5-2b lab file, and Requesty lists no formats)
 # system_updates = true: supports_system_mid_conversation on https://router.requesty.ai/v1/models/managed
 # effort_updates = false, tools.updates = false: Chat Completions takes reasoning_effort per request and has no tool-change message (https://docs.requesty.ai/features/reasoning)
 schema = 2
@@ -8,7 +9,7 @@ open_weights = false
 release_date = "2026-03-10"
 
 [modalities]
-input = ["text", "image"]
+input = ["text", "image/bmp", "image/jpeg", "image/png", "image/tiff", "image/webp", "image/heic"]
 output = ["text"]
 
 [capabilities]

@@ -96,8 +96,14 @@ export function buildRequestyModel(
     const cost = buildCost(model);
     const reasoning = model.supports_reasoning;
 
-    const canonical = resolveRequestyBaseModel(model.id) ?? existing?.base_model;
+    const resolved = resolveRequestyBaseModel(model.id);
+    const canonical = resolved ?? existing?.base_model;
     if (canonical !== undefined) {
+        // A hand-linked route whose catalog reports no output limit (0)
+        // inherits the lab's instead of the context-window fallback.
+        const factoredLimit = resolved === undefined && model.max_output_tokens <= 0
+            ? { context }
+            : limit;
         return factorBaseModel(
             canonical,
             {
@@ -108,9 +114,9 @@ export function buildRequestyModel(
                 structured_output: structuredOutput,
                 status: existing?.status,
                 cost,
-                limit,
+                limit: factoredLimit,
             },
-            limit,
+            factoredLimit,
         );
     }
 
