@@ -3644,6 +3644,7 @@ test("factors aliased LLM Gateway routes against canonical metadata", () => {
 
   expect(model).toEqual({
     base_model: "zhipuai/glm-5.2",
+    name: "GLM-5.2 (260617)",
     cost: {
       input: 1.4,
       output: 4.4,
@@ -3933,6 +3934,22 @@ test("LLM Gateway base_model files leave model facts to the lab", () => {
   for (const key of ["family", "knowledge", "release_date", "last_updated", "open_weights"]) {
     expect(model).not.toHaveProperty(key);
   }
+});
+
+test("LLM Gateway keeps its display name on linked files", () => {
+  // A resync keeps the authored name override; a new linked file takes the
+  // catalog name where it differs from the lab.
+  const resync = buildLLMGatewayModel(llmGatewayModel({ name: "Renamed Upstream" }), {
+    base_model: "anthropic/claude-fable-5",
+    name: "Claude Fable Five",
+  });
+  expect(resync).toMatchObject({ name: "Claude Fable Five" });
+
+  const created = buildLLMGatewayModel(llmGatewayModel({ name: "Claude Fable Five" }), undefined);
+  expect(created).toMatchObject({ base_model: "anthropic/claude-fable-5", name: "Claude Fable Five" });
+
+  const same = buildLLMGatewayModel(llmGatewayModel({ name: "Claude Fable 5" }), undefined);
+  expect(same).not.toHaveProperty("name");
 });
 
 test("reads curation from v2 aggregated siblings", () => {

@@ -370,6 +370,9 @@ export function buildLLMGatewayModel(
     return factorBaseModel(
       existing.base_model,
       {
+        // LLM Gateway's display name stays as an override where it differs
+        // from the lab (factorBaseModel drops it when equal).
+        name: existing.name,
         attachment: existing.attachment,
         description: existing.description ?? describeModel({
           id: model.id,
@@ -450,6 +453,7 @@ export function buildLLMGatewayModel(
   if (canonical !== undefined) {
     const factoredLimit = { context, input: undefined, output: undefined };
     return factorBaseModel(canonical, {
+      name: model.name,
       reasoning_options: reasoningOptions,
       limit: factoredLimit,
       cost,
